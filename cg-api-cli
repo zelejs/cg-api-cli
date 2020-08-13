@@ -6,7 +6,7 @@ usage() {
 Usage: cg-api-cli <module> <sql> <cruds>
 
 Example:
-  cg-api-cil
+  cg-api-cil test test.sql test.json
 
 Paramters:
   module	代码模块名
