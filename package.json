@@ -1,0 +1,14 @@
+{
+    "name": "cg-cli",
+    "version": "0.0.1",
+    "main": "cg-cli",
+    "repository": "dev",
+    "author": "smallsaas.cn",
+    "dependencies": {
+        "commander": "^2.16.0",
+        "handlebars": "^4.0.11"
+    },
+    "bin": {
+        "cg-api-cli": "./cg-api-cli"
+    }
+}
