@@ -26,3 +26,5 @@ Paramters:
   cruds		cruds文件路径
 ```
 
+> 执行命令后会新建一个项目名和**module**同名的maven项目，后续可用maven命令进行编译和测试。
+
