@@ -1,0 +1,48 @@
+package ${cfg.modelPackage};
+
+#set($slaves = ${cfg.slaves})
+#if($tablename.equalsIgnoreCase(${cfg.masterModel}))
+    #set($pack = "import com.jfeat.am.common.crud.plus.impl.CRUDServiceOverModelImpl;")
+    #set($ext = " extends CRUDServiceOverModelImpl<"+${entity}+","+${entity}+"Model"+">")
+    #set($modelpack ="import "+ ${cfg.modelPackage}+"."+${entity}+"Model;")
+#end
+#if($modelpack)
+import java.util.List;
+#foreach($item in $slaves)
+import ${cfg.am}.${cfg.en}.services.gen.persistence.model.${item};
+#end
+#end
+import ${cfg.am}.${cfg.en}.services.gen.persistence.model.${entity};
+
+/**
+ * Created by ${author} on ${date}
+ */
+public class ${entity}Model extends ${entity}{
+#if($modelpack)
+#foreach($item in $slaves)
+#if($slaves.size() > 1)
+    #set($ItemName = $item)
+    #set($itemName = $item.substring(0,1).toLowerCase()+$item.substring(1))
+    private List<${item}> ${itemName}s;
+
+    public List<${item}> get${item}s() {
+        return ${itemName}s;
+    }
+
+    public void set${item}s(List<${item}> ${itemName}s) {
+        this.${itemName}s = ${itemName}s;
+    }
+#else
+    private List<${item}> items;
+
+    public List<${item}> getItems() {
+        return this.items;
+    }
+
+    public void setItems(List<${item}> items) {
+        this.items = items;
+    }
+#end
+#end
+#end
+}
