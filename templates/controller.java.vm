@@ -38,6 +38,7 @@ package ${package.Controller};
     #else
         #set ($entityPaths = $entityPaths+"s")
     #end
+import com.jfeat.am.core.jwt.JWTKit;
 import com.jfeat.crud.plus.META;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
