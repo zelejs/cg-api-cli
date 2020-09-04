@@ -19,6 +19,7 @@
         <crud-core.version>0.0.5</crud-core.version>
         <crud-plus.version>0.1.0</crud-plus.version>
         <crud-dev.version>0.0.1</crud-dev.version>
+        <jwt-core.version>0.0.4</jwt-core.version>
     </properties>
 
     <dependencies>
@@ -32,6 +33,12 @@
             <groupId>com.jfeat</groupId>
             <artifactId>crud-core</artifactId>
             <version>${crud-core.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.jfeat</groupId>
+            <artifactId>jwt-core</artifactId>
+            <version>${jwt-core.version}</version>
         </dependency>
 
         <dependency>
