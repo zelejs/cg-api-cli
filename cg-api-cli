@@ -69,7 +69,7 @@ echo "java -jar $lib --type path  $module $sql $cruds"
 java -jar $lib --type path $module $sql $cruds
 
 ## create pom.xml
-project=$module
-pom_template=$path/templates/pom.xml
-echo "sed "s/\${project_name}/$module/g" $pom_template  > $project/pom.xml;"
-sed "s/\${project_name}/$module/g" $pom_template > $project/pom.xml;
+## project=$module
+## pom_template=$path/templates/pom.xml
+## echo "sed "s/\${project_name}/$module/g" $pom_template  > $project/pom.xml;"
+## sed "s/\${project_name}/$module/g" $pom_template > $project/pom.xml;
