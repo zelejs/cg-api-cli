@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="${cfg.am}.#if(${cfg.en})${cfg.en}#end.services.domain.dao.Query${entity}Dao">
+    #set($fields = ${table.fields})
+    #set($orgId=false)
+    #set($createdTime=false)
+    #set($updatedTime=false)
+    #set($lastModifiedTime=false)
+    #foreach($field in $fields)
+        #if($field.name=="org_id")
+            #set($orgId=true)
+        #end
+        #if($field.name=="created_time")
+            #set($createdTime=true)
+        #end
+        #if($field.name=="updated_time")
+            #set($updatedTime=true)
+        #end
+        #if($field.name=="last_modified_time")
+            #set($lastModifiedTime=true)
+        #end
+    #end
+    <sql id="Base_Column_List">
+        #set($columnList="")
+        #foreach($item in $fields)
+            #set($ItemName="")
+            #if($item.name.contains("_"))
+                #set($fs=$item.name.split("_"))
+                #foreach($f in $fs)
+                    #set($ffs = $f.substring(0,1).toUpperCase()+$f.substring(1))
+                    #set($ItemName=$ItemName+$ffs)
+                #end
+                #set($ItemName=$ItemName.substring(0,1).toLowerCase()+$ItemName.substring(1))
+            #end
+            #set($column=$table.name+"."+$item.name)
+            #if($ItemName != "")
+                #set($column=$column+" AS "+$ItemName)
+            #end
+            #if($columnList == "")
+                #set($columnList=$column)
+            #else
+                #set($columnList=$columnList+", "+$column)
+            #end
+        #end
+        $columnList
+    </sql>
+
+    #if($orgId)
+    <sql id="QueryOwnedOrgIds">
+         SELECT children.id FROM t_sys_org, t_sys_org as children WHERE t_sys_org.left_num &lt;= children.left_num AND
+         t_sys_org.right_num >= children.left_num and t_sys_org.id=#{ownerOrgId} order by t_sys_org.node_level ASC
+    </sql>
+    #end
+
+    <select id="queryMasterModel" resultType="${entity}Model">
+       SELECT ${table.name}.*
+       FROM ${table.name}
+       WHERE ${table.name}.id=#{id}
+       GROUP BY ${table.name}.id
+    </select>
+
+##<select id="queryOwnedUsers" resultType="com.jfeat.am.uaas.org.services.domain.dao.TestModel">
+##    SELECT t_sys_user.*
+##    FROM t_sys_user, (<include refid="QueryOwnedOrgIds"></include>) AS ownedOrgIds
+##    WHERE t_sys_user.org_id = ownedOrgIds.id
+##</select>
+##
+##<sql id="QueryOwnedOrgIdsByLeftJoin">
+##    SELECT children.id AS ownerOrgId FROM t_sys_org, t_sys_org as children WHERE t_sys_org.left_num &lt;= children.left_num AND
+##    t_sys_org.right_num >= children.left_num and t_sys_org.id=#{ownerOrgId} order by t_sys_org.node_level ASC
+##</sql>
+##
+## Method#2
+##<select id="queryOwnedUsersByLeftJoin" resultType="com.jfeat.am.uaas.org.services.domain.dao.TestModel">
+##    SELECT t_sys_user.*
+##    FROM t_sys_user
+##    LEFT JOIN (<include refid="QueryOwnedOrgIdsByLeftJoin"></include>) AS visibleOrgIds
+##    ON t_sys_user.org_id = visibleOrgIds.ownerOrgId
+##    where visibleOrgIds.ownerOrgId IS NOT NULL
+##</select>
+##
+
+## check if has org_id field
+#set($hasOrgIdField=false)
+#foreach($item in $fields)
+    #set($ItemName=$item.name)
+    #if($item.name=="org_id")
+        #set($hasOrgIdField=true)
+    #end
+#end
+
+    <select id="find${entity}Page" resultType="${entity}Record" parameterType="${entity}Record">
+    ##set($debEntity = $entity.substring(0,1).toLowerCase() + $entity.substring(1,$entity.length()))
+        SELECT include<    <sql id="Base_Column_List">
+        FROM ${table.name}
+        #if($hasOrgIdField)
+        <if test="record.orgId > 0">
+            ,(<include refid="QueryOwnedOrgIds"></include>) AS ownedOrgIds
+        </if>
+        #end
+        WHERE 1=1
+        #if($hasOrgIdField)
+        <if test="record.orgId > 0">
+            AND t_sys_user.org_id = ownedOrgIds.id
+        </if>
+        #end
+        #set($hasCreatedTimeField=false)
+        #set($hasUpdatedTimeField=false)
+        #set($hasLastModifiedTimeField=false)
+        #foreach($item in $fields)
+            #set($ItemName=$item.name)
+            #if($item.name=="created_time")
+                #set($hasCreatedTimeField=true)
+            #end
+            #if($item.name=="updated_time")
+                #set($hasUpdatedTimeField=true)
+            #end
+            #if($item.name=="last_modified_time")
+                #set($hasLastModifiedTimeField=true)
+            #end
+            #if($ItemName.contains("_"))
+            #*
+            #set($tempstr = ${item.name})
+            #set($nub = $tempstr.lastIndexOf("_")+1)
+            #set($last = $tempstr.substring($nub) )
+            #set ($lastName = $last.substring(0,1).toUpperCase() + $last.substring(1,$last.length()))
+            #set($ItemName = $tempstr.substring(0,$tempstr.lastIndexOf("_"))+$lastName)
+            *#
+                #set($fs=$ItemName.split("_"))
+                #set($ItemName="")
+                #foreach($f in $fs)
+                    #set($ffs = $f.substring(0,1).toUpperCase()+$f.substring(1))
+                    #set($ItemName=$ItemName+$ffs)
+                #end
+                #set($ItemName=$ItemName.substring(0,1).toLowerCase()+$ItemName.substring(1))
+            #end
+            <if test="record.$ItemName != null and record.$ItemName#if($item.columnType=='STRING'||$item.columnType==
+                'TEXT')!= ''#else>0 #end">
+                #if($item.name == "org_id")
+                    AND ${table.name}.${item.name} IN <include refid="QueryOwnedOrgIds"/>
+                #else
+                    AND ${table.name}.${item.name} LIKE CONCAT('%',#{record.$item.propertyName},'%')
+                #end
+            </if>
+        #end
+        <if test="startTime != null">
+            <![CDATA[AND ${table.name}.start_time >= DATE(#{startTime})]]>
+        </if>
+        <if test="endTime != null">
+            <![CDATA[AND ${table.name}.end_time <= DATE(#{endTime)]]>
+        </if>
+    ## end foreach
+        <!--
+        <if test="search != null and search != ''">
+            OR ${table.name}.name LIKE CONCAT('%',#{search},'%')
+        </if>
+        -->
+        #set($hasOrderBy = false)
+        #if($hasUpdatedTimeField)
+            #set($hasOrderBy = true)
+            ORDER BY updated_time DESC
+        #end
+        #if($hasLastModifiedTimeField)
+            #if($hasOrderBy)
+                , last_modified_time DESC
+            #else
+                #set($hasOrderBy = true)
+                ORDER BY last_modified_time DESC
+            #end
+        #end
+        #if($hasCreatedTimeField)
+            #if($hasOrderBy)
+                , created_time DESC
+            #else
+                ORDER BY created_time DESC
+            #end
+        #end
+    </select>
+</mapper>

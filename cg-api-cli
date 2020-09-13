@@ -1,0 +1,78 @@
+#!/bin/bash
+
+usage() {
+  cat <<EOF > /dev/stdout
+
+Usage: cg-api-cli <module> <sql> <cruds>
+
+Example:
+  cg-api-cil test test.sql test.json
+
+Paramters:
+  module	代码模块名
+  sql		sql文件路径
+  cruds		cruds文件路径
+EOF
+}
+
+## start
+
+module=$1
+sql=$2
+cruds=$3
+
+if [ -z $module ]; then
+  echo "cg-api-cli: 未指定moduleName"
+  # usage
+  exit;
+fi
+
+if [ -z $sql ]; then
+  echo "cg-api-cli: 未指定sql文件"
+  # usage
+  exit;
+fi
+
+if [ -z $cruds ]; then
+  echo "cg-api-cli: 未指定cruds文件"
+  exit;
+fi
+
+if [ ! -f $sql ]; then
+  echo "cg-api-cli: 无法获取文件: $sql"
+  exit;
+fi
+
+if [ ! -f $cruds ]; then
+  echo "cg-api-cli: 无法获取文件: $cruds"
+  exit;
+fi
+
+
+#sql_content=$(< $sql)
+#cruds_content=$(< $cruds)
+
+#echo "sql content: $sql_content"
+#echo "cruds_content: $cruds_content"
+
+## java jar
+#path=$(cd `dirname $0`;pwd)
+rootpath=$(readlink -f $0)
+path=$(dirname $rootpath)
+lib=$path/lib/cg-cli-1.0.0.jar
+
+if [ ! -f $lib ]; then
+  echo "cg-api-cli: fail to locate $lib"
+  echo "Download from https://github.com/zelejs/cg-api-cli/releases/download/latest/cg-cli-1.0.0.jar and save into ./lib dir"
+  exit
+fi
+
+## execute jar
+echo "java -jar $lib --type path  $module $sql $cruds"
+java -jar $lib --type path $module $sql $cruds
+
+## create pom.xml
+## project=$module
+## pom_template=$path/templates/pom.xml
+## echo "sed "s/\${project_name}/$module/g" $pom_template  > $project/pom.xml;"
+## sed "s/\${project_name}/$module/g" $pom_template > $project/pom.xml;

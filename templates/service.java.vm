@@ -1,0 +1,73 @@
+package ${package.Service};
+    #set($serviceName=${table.serviceName})
+    #set($tablename = ${table.name})
+    #if($tablename.equalsIgnoreCase(${cfg.masterOnly}))
+        #set($pack = "import com.jfeat.crud.plus.CRUDServiceOnly;")
+        #set($ext = " extends CRUDServiceOnly<"+${entity}+">")
+    #elseif($tablename.equalsIgnoreCase(${cfg.masterModel}))
+        #set($pack = "import com.jfeat.crud.plus.CRUDServiceOverModel;")
+        #set($ext = " extends CRUDServiceOverModel<"+${entity}+","+${entity}+"Model"+">")
+        #set($modelpack ="import "+ ${cfg.modelPackage}+"."+${entity}+"Model;")
+    #elseif($tablename.equalsIgnoreCase(${cfg.slave1}))
+
+        #set($pack = "import com.jfeat.crud.plus.CRUDServiceOnly;")
+        #set($ext = " extends CRUDServiceOnly<"+${entity}+">")
+        #set($serviceName=$serviceName.replaceFirst("Service","SlaveService"))
+
+    #elseif($tablename.equalsIgnoreCase(${cfg.slave2}))
+        #set($pack = "import com.jfeat.crud.plus.CRUDServiceOnly;")
+        #set($ext = " extends CRUDServiceOnly<"+${entity}+">")
+    #elseif($tablename.equalsIgnoreCase(${cfg.slave3}))
+        #set($pack = "import com.jfeat.crud.plus.CRUDServiceOnly;")
+        #set($ext = " extends CRUDServiceOnly<"+${entity}+">")
+    #elseif($tablename.equalsIgnoreCase(${cfg.slave4}))
+        #set($pack = "import com.jfeat.crud.plus.CRUDServiceOnly;")
+        #set($ext = " extends CRUDServiceOnly<"+${entity}+">")
+    #elseif($tablename.equalsIgnoreCase(${cfg.slave5}))
+        #set($pack = "import com.jfeat.crud.plus.CRUDServiceSlave;"))
+        #set($ext = " extends CRUDServiceSlave<"+${entity}+">")
+    #elseif($tablename.equalsIgnoreCase(${cfg.child}))
+        #set($pack = "")
+        #set($ext = "")
+    #elseif($tablename.equalsIgnoreCase(${cfg.relation}))
+        #set($pack = "import com.jfeat.crud.plus.CRUDServicePeer;")
+        #set($ext = " extends CRUDServicePeer<"+${cfg.moreName}+","+${cfg.moreToName}+","+${entity}+">")
+    #elseif($tablename.equalsIgnoreCase(${cfg.groupBy}))
+        #set($pack = "import com.jfeat.crud.plus.CRUDServiceGroupBy;")
+        #set($ext = " extends CRUDServiceGroupBy<"+${cfg.groupName}+","+${cfg.groupByName}+">")
+    #elseif($tablename.equalsIgnoreCase($cfg.group))
+        #set($pack="import com.jfeat.crud.plus.CRUDServiceGroup;")
+        #set($ext=" extends CRUDServiceGroup<"+${entity}+">")
+    #else
+        #set($pack = "import com.jfeat.crud.plus.CRUDServiceOnly;")
+        #set($ext = " extends CRUDServiceOnly<"+${entity}+">")
+    #end
+#if($tablename.equalsIgnoreCase(${cfg.groupBy}))
+import ${package.Entity}.${cfg.groupName};
+#end
+$!pack
+import ${package.Entity}.${entity};
+#if($tablename.equalsIgnoreCase(${cfg.relation}))
+import ${package.Entity}.${cfg.moreName};
+import ${package.Entity}.${cfg.moreToName};
+#end
+#if($modelpack)
+$!modelpack
+#end
+
+/**
+ * <p>
+ * $!{table.comment} service interface
+ * </p>
+ *
+ * @author ${author}
+ * @since ${date}
+ * Master: ${cfg.masterModel}
+ #if($modelpack)
+ #else
+ * Slave : $tablename
+ #end
+ */
+public interface ${serviceName.replace("Slave","")} $!ext {
+
+}

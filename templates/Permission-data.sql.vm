@@ -1,0 +1,8 @@
+INSERT INTO `perm_group` (`id`, `name`, `identifier`) VALUES
+('${cfg.foreignId}', '$!{entity}模块', '$!{entity}.management');
+
+INSERT INTO `perm` (`id`, `groupid`, `name`, `identifier`) VALUES
+('${cfg.firstId}', '${cfg.foreignId}', '查看$!{entity}', '$!{entity}.view'),
+('${cfg.secondId}', '${cfg.foreignId}', '新建$!{entity}', '$!{entity}.new');
+('${cfg.secondId}', '${cfg.foreignId}', '编辑$!{entity}', '$!{entity}.edit');
+('${cfg.secondId}', '${cfg.foreignId}', '删除$!{entity}', '$!{entity}.delete');

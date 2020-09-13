@@ -1,0 +1,10 @@
+package ${cfg.domainRecordPackage};
+
+import ${cfg.am}.${cfg.en}.services.gen.persistence.model.${entity};
+
+/**
+ * Created by ${author} on ${date}
+ */
+public class ${entity}Record extends ${entity}{
+    
+}

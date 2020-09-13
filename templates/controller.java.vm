@@ -1,0 +1,430 @@
+package ${package.Controller};
+    #set ($ServiceName = ${table.serviceName})
+    #set ($ServiceName = $ServiceName.replaceFirst("CRUD", ""))
+    #set ($orgIdFieldName = "org_id")
+
+    ## #if($tablename.equalsIgnoreCase(${cfg.slave1}))
+    ##    #set ($ServiceName = $ServiceName.replaceFirst("Service", "SlaveService"))
+    ## #elseif($tablename.equalsIgnoreCase(${cfg.slave2}))
+    ##    #set ($ServiceName = $ServiceName.replaceFirst("Service", "SlaveService"))
+    ## #elseif($tablename.equalsIgnoreCase(${cfg.slave3}))
+    ##    #set ($ServiceName = $ServiceName.replaceFirst("Service", "SlaveService"))
+    ## #elseif($tablename.equalsIgnoreCase(${cfg.slave4}))
+    ##    #set ($ServiceName = $ServiceName.replaceFirst("Service", "SlaveService"))
+    ## #elseif($tablename.equalsIgnoreCase(${cfg.slave5}))
+    ##    #set ($ServiceName = $ServiceName.replaceFirst("Service", "SlaveService"))
+    ## #end
+
+    #set ($serviceName = $ServiceName.substring(0,1).toLowerCase() + $ServiceName.substring(1,$ServiceName.length()))
+## entity -> entities
+    #set ($entities = ${entity})
+    #if($entities.endsWith("s"))
+        #set ($entities = $entities+"es")
+    #elseif($entities.endsWith("y"))
+        #set ($idx = $entities.length())
+        #set ($idx = $idx-1)
+        #set ($entities = $entities.substring(0,$idx)+"ies")
+    #else
+        #set ($entities = $entities+"s")
+    #end
+## entityPath -> entityPaths
+    #set ($entityPaths = ${table.entityPath})
+    #if($entityPaths.endsWith("s"))
+        #set ($entityPaths = $entityPaths+"es")
+    #elseif($entityPaths.endsWith("y"))
+        #set ($idx = $entityPaths.length())
+        #set ($idx = $idx-1)
+        #set ($entityPaths = $entityPaths.substring(0,$idx)+"ies")
+    #else
+        #set ($entityPaths = $entityPaths+"s")
+    #end
+import com.jfeat.am.core.jwt.JWTKit;
+import com.jfeat.crud.plus.META;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.web.bind.annotation.GetMapping;
+import com.baomidou.mybatisplus.plugins.Page;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.dao.DuplicateKeyException;
+import ${cfg.am}.${cfg.en}.services.domain.dao.Query${entity}Dao;
+import com.jfeat.crud.base.tips.SuccessTip;
+import com.jfeat.crud.base.request.Ids;
+import com.jfeat.crud.base.tips.Tip;
+import com.jfeat.am.module.log.annotation.BusinessLog;
+import com.jfeat.crud.base.exception.BusinessCode;
+import com.jfeat.crud.base.exception.BusinessException;
+import com.jfeat.crud.plus.CRUDObject;
+import ${cfg.am}.$!{cfg.en}.api.permission.*;
+import com.jfeat.am.common.annotation.Permission;
+
+import java.math.BigDecimal;
+
+import ${cfg.am}.${cfg.en}.services.domain.service.$ServiceName;
+import ${cfg.am}.${cfg.en}.services.domain.model.${entity}Record;
+#if($tablename.equalsIgnoreCase(${cfg.master}))
+import ${cfg.am}.${cfg.en}.services.gen.crud.model.${entity}Model;
+#end
+import ${package.Entity}.${entity};
+
+    #if(${restControllerStyle})
+    import org.springframework.web.bind.annotation.RestController;
+    #else
+    import org.springframework.stereotype.Controller;
+    #end
+    #if(${superControllerClassPackage})
+    import ${superControllerClassPackage};
+    #end
+
+import javax.annotation.Resource;
+import java.util.Date;
+
+
+/**
+ * <p>
+ * $!{table.comment} api
+ * </p>
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+#if(${restControllerStyle})
+@RestController
+#else
+@Controller
+#end
+
+@Api("${entity}")
+##@RequestMapping("/api/crud/#if(${package.ModuleName})/${package.ModuleName}#end/#if(${controllerMappingHyphenStyle})${controllerMappingHyphen}#else${table.entityPath}#end")
+@RequestMapping("/api/crud/#if(${package.ModuleName})/${package.ModuleName}#end/$entityPaths")
+#if(${superControllerClass})
+public class ${table.controllerName} extends ${superControllerClass} {
+#else
+public class ${table.controllerName} {
+#end
+#set ($tableName = ${table.name})
+#if($tablename.equalsIgnoreCase(${cfg.groupBy}))
+
+@Resource
+    $ServiceName $serviceName;
+
+@GetMapping("/{id}")
+public Tip get${entity}(@PathVariable Long id){
+        return SuccessTip.create(${serviceName}.getGroupItems(id));
+        }
+
+@GetMapping("/groupData")
+public Tip groupData(){
+        return SuccessTip.create(${serviceName}.groupBy());
+        }
+#else
+
+
+
+@Resource
+    $ServiceName $serviceName;
+
+@Resource
+    Query${entity}Dao query${entity}Dao;
+
+@BusinessLog(name = "${entity}", value = "create ${entity}")
+@Permission(${entity}Permission.$!{entity.toUpperCase()}_NEW)
+@PostMapping
+#if($tablename.equalsIgnoreCase(${cfg.master}))
+@ApiOperation(value = "新建 ${entity}",response = ${entity}Model.class)
+#else
+@ApiOperation(value = "新建 ${entity}",response = ${entity}.class)
+#end
+#if($tablename.equalsIgnoreCase(${cfg.master}))
+public Tip create${entity}(@RequestBody ${entity}Model entity){
+#else
+public Tip create${entity}(@RequestBody ${entity} entity){
+#end
+
+        Integer affected=0;
+        try{
+    #if($tableName.equals(${cfg.master}))
+            affected= ${serviceName}.createMaster(entity,null,null,null);
+    #elseif(${cfg.master.equals("serviceOnly")})
+            affected= ${serviceName}.createMaster(entity);
+    #elseif($tablename.equalsIgnoreCase($cfg.group))
+            affected= ${serviceName}.createGroup(entity);
+    ##        #elseif($tablename.equalsIgnoreCase(${cfg.slave1}))
+    ##            affected = ${serviceName}.addSlaveItem(entity);
+    #else
+            affected= ${serviceName}.createMaster(entity);
+    #end
+
+        }catch(DuplicateKeyException e){
+        throw new BusinessException(BusinessCode.DuplicateKey);
+        }
+
+        return SuccessTip.create(affected);
+        }
+
+#if($tablename.equalsIgnoreCase(${cfg.master}))
+@BusinessLog(name = "${entity}", value = "查看 ${entity}Model")
+#else
+#end
+@Permission(${entity}Permission.$!{entity.toUpperCase()}_VIEW)
+@GetMapping("/{id}")
+#if($tablename.equalsIgnoreCase(${cfg.master}))
+@ApiOperation(value = "查看 ${entity}",response = ${entity}Model.class)
+#else
+@ApiOperation(value = "查看 ${entity}",response = ${entity}.class)
+#end
+public Tip get${entity}(@PathVariable Long id){
+    #if($tableName.equals(${cfg.master}))
+            CRUDObject<${entity}Model> entity = ${serviceName}.retrieveMaster(id,null,null,null);
+            if(entity != null) {
+                return SuccessTip.create(entity.toJSONObject());
+            } else {
+                return SuccessTip.create();
+            }
+    #elseif(${cfg.master.equals("serviceOnly")})
+    ## replace retrieveMaster with queryMasterModel from dao, retrieveMaster not enough for business query
+    ##      return SuccessTip.create(${serviceName}.retrieveMaster(id));
+            return SuccessTip.create(${serviceName}.queryMasterModel(query${entity}Dao, id));
+    #elseif($tablename.equalsIgnoreCase($cfg.group))
+            return SuccessTip.create(${serviceName}.getGroupChildren(id));
+    ## All slaves as serviceOnly, so comment below 2 lines
+    ##    #elseif($tablename.equalsIgnoreCase(${cfg.slave1}))
+    ##        return SuccessTip.create(${serviceName}.getSlaveItem(id));
+    #else
+            return SuccessTip.create(${serviceName}.retrieveMaster(id));
+    #end
+        }
+
+@BusinessLog(name = "${entity}", value = "update ${entity}")
+@Permission(${entity}Permission.$!{entity.toUpperCase()}_EDIT)
+@PutMapping("/{id}")
+#if($tablename.equalsIgnoreCase(${cfg.master}))
+@ApiOperation(value = "修改 ${entity}",response = ${entity}Model.class)
+#else
+@ApiOperation(value = "修改 ${entity}",response = ${entity}.class)
+#end
+#if($tablename.equalsIgnoreCase(${cfg.master}))
+public Tip update${entity}(@PathVariable Long id,@RequestBody ${entity}Model entity){
+#else
+public Tip update${entity}(@PathVariable Long id,@RequestBody ${entity} entity){
+#end
+        entity.setId(id);
+    #if($tableName.equals(${cfg.master}))
+            return SuccessTip.create(${serviceName}.updateMaster(entity,null,null,null));
+    #elseif(${cfg.master.equals("serviceOnly")})
+            return SuccessTip.create(${serviceName}.updateMaster(entity));
+    #elseif($tablename.equalsIgnoreCase($cfg.group))
+            return SuccessTip.create(${serviceName}.updateGroup(entity));
+    ##        #elseif($tablename.equalsIgnoreCase(${cfg.slave1}))
+    ##            return SuccessTip.create(${serviceName}.updateSlaveItem(entity));
+    #else
+            return SuccessTip.create(${serviceName}.updateMaster(entity));
+    #end
+        }
+
+@BusinessLog(name = "${entity}", value = "delete ${entity}")
+@Permission(${entity}Permission.$!{entity.toUpperCase()}_DELETE)
+@DeleteMapping("/{id}")
+@ApiOperation("删除 ${entity}")
+public Tip delete${entity}(@PathVariable Long id){
+    #if($tableName.equals(${cfg.master}))
+            return SuccessTip.create(${serviceName}.deleteMaster(id));
+    #elseif(${cfg.master.equals("serviceOnly")})
+            return SuccessTip.create(${serviceName}.deleteMaster(id));
+    #elseif($tablename.equalsIgnoreCase($cfg.group))
+            return SuccessTip.create(${serviceName}.deleteGroup(id));
+    ##    #elseif($tablename.equalsIgnoreCase(${cfg.slave1}))
+    ##        return SuccessTip.create(${serviceName}.removeSlaveItem(id));
+    #else
+            return SuccessTip.create(${serviceName}.deleteMaster(id));
+    #end
+        }
+
+@Permission(${entity}Permission.$!{entity.toUpperCase()}_VIEW)
+@ApiOperation(value = "${entity} 列表信息",response = ${entity}Record.class)
+@GetMapping
+@ApiImplicitParams({
+        @ApiImplicitParam(name= "pageNum", dataType = "Integer"),
+        @ApiImplicitParam(name= "pageSize", dataType = "Integer"),
+        @ApiImplicitParam(name= "search", dataType = "String"),
+    #set($fields = ${table.fields})
+    #set($itemSize=${table.fields.size()})
+    #set($itemIdx=0)
+    #foreach($item in $fields)
+        #set($datatype="String")
+        #if($item.columnType=='LONG')
+            #set($datatype="Long")
+        #end
+        #if($item.columnType=='INTEGER')
+            #set($datatype="Integer")
+        #end
+        #if($item.columnType=='BIG_DECIMAL')
+            #set($datatype="BigDecimal")
+        #end
+        #if($item.columnType=='DATE')
+            #set($datatype="Date")
+        #end
+        #set($itemName=$item.name)
+        #if($itemName.contains("_"))
+            #set($tempstr = ${item.name})
+            #set($nub = $tempstr.lastIndexOf("_")+1)
+            #set($last = $tempstr.substring($nub) )
+            #set ($lastName = $last.substring(0,1).toUpperCase() + $last.substring(1,$last.length()))
+            #set($itemName = $tempstr.substring(0,$tempstr.lastIndexOf("_"))+$lastName)
+        #end
+        #if($itemName.contains("_"))
+            #set($tempstr = ${itemName})
+            #set($nub = $tempstr.lastIndexOf("_")+1)
+            #set($last = $tempstr.substring($nub) )
+            #set ($lastName = $last.substring(0,1).toUpperCase() + $last.substring(1,$last.length()))
+            #set($itemName = $tempstr.substring(0,$tempstr.lastIndexOf("_"))+$lastName)
+        #end
+        #set($itemIdx=$itemIdx+1)
+        #if($itemIdx<$itemSize)
+                @ApiImplicitParam(name = "$itemName", dataType = "$datatype"),
+        #else
+                @ApiImplicitParam(name = "$itemName", dataType = "$datatype") ,
+                @ApiImplicitParam(name = "orderBy", dataType = "String"),
+                @ApiImplicitParam(name = "sort", dataType = "String")
+        #end
+    #end
+})
+public Tip query$entities(Page<${entity}Record> page,
+@RequestParam(name = "pageNum", required = false, defaultValue = "1") Integer pageNum,
+@RequestParam(name = "pageSize", required = false, defaultValue = "10") Integer pageSize,
+@RequestParam(name = "search", required = false) String search,
+    #set($fields = ${table.fields})
+    #set($itemSize=${table.fields.size()})
+    #set($itemIdx=0)
+    #foreach($item in $fields)
+        #set($datatype="String")
+        #if($item.columnType=='LONG')
+            #set($datatype="Long")
+        #end
+        #if($item.columnType=='INTEGER')
+            #set($datatype="Integer")
+        #end
+        #if($item.columnType=='BIG_DECIMAL')
+            #set($datatype="BigDecimal")
+        #end
+        #if($item.columnType=='DATE')
+            #set($datatype="Date")
+        #end
+        #set($itemName=$item.name)
+        #if($itemName.contains("_"))
+            #set($tempstr = ${item.name})
+            #set($nub = $tempstr.lastIndexOf("_")+1)
+            #set($last = $tempstr.substring($nub) )
+            #set ($lastName = $last.substring(0,1).toUpperCase() + $last.substring(1,$last.length()))
+            #set($itemName = $tempstr.substring(0,$tempstr.lastIndexOf("_"))+$lastName)
+        #end
+        #if($itemName.contains("_"))
+            #set($tempstr = ${itemName})
+            #set($nub = $tempstr.lastIndexOf("_")+1)
+            #set($last = $tempstr.substring($nub) )
+            #set ($lastName = $last.substring(0,1).toUpperCase() + $last.substring(1,$last.length()))
+            #set($itemName = $tempstr.substring(0,$tempstr.lastIndexOf("_"))+$lastName)
+        #end
+        #if($itemName.contains("_"))
+            #set($tempstr = ${itemName})
+            #set($nub = $tempstr.lastIndexOf("_")+1)
+            #set($last = $tempstr.substring($nub) )
+            #set ($lastName = $last.substring(0,1).toUpperCase() + $last.substring(1,$last.length()))
+            #set($itemName = $tempstr.substring(0,$tempstr.lastIndexOf("_"))+$lastName)
+        #end
+        #if($itemName.contains("_"))
+            #set($tempstr = ${itemName})
+            #set($nub = $tempstr.lastIndexOf("_")+1)
+            #set($last = $tempstr.substring($nub) )
+            #set ($lastName = $last.substring(0,1).toUpperCase() + $last.substring(1,$last.length()))
+            #set($itemName = $tempstr.substring(0,$tempstr.lastIndexOf("_"))+$lastName)
+        #end
+        #if($item.name != $orgIdFieldName)
+            #if($datatype == "Date")
+            @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss") $datatype $itemName,
+            #else
+            @RequestParam(name = "$itemName", required = false) $datatype $itemName,
+            #end
+        #end
+        #set($itemIdx=$itemIdx+1)
+        #if($itemIdx<$itemSize)
+        @RequestParam(name = "$itemName", required = false) $datatype $itemName,
+        #else
+        @RequestParam(name = "$itemName", required = false) $datatype $itemName,
+        @RequestParam(name = "orderBy", required = false) String orderBy,
+        @RequestParam(name = "sort", required = false)  String sort) {
+        #end
+    #end
+        if(orderBy!=null&&orderBy.length()>0){
+        if(sort!=null&&sort.length()>0){
+        String pattern = "(ASC|DESC|asc|desc)";
+        if(!sort.matches(pattern)){
+        throw new BusinessException(BusinessCode.BadRequest.getCode(), "sort must be ASC or DESC");//此处异常类型根据实际情况而定
+        }
+        }else{
+        sort = "ASC";
+        }
+        orderBy = "`"+orderBy+"`" +" "+sort;
+        }
+        page.setCurrent(pageNum);
+        page.setSize(pageSize);
+
+##set($entityLowerCase=${entity.toLowerCase()})
+    ${entity}Record record = new ${entity}Record();
+    #set($fields = ${table.fields})
+    #foreach($item in $fields)
+        #set($itemName=$item.name)
+        ## repeat 3 times to convert CamelCase
+        #if($itemName.contains("_"))
+            #set($tempstr = ${item.name})
+            #set($nub = $tempstr.lastIndexOf("_")+1)
+            #set($last = $tempstr.substring($nub) )
+            #set ($lastName = $last.substring(0,1).toUpperCase() + $last.substring(1,$last.length()))
+            #set($itemName = $tempstr.substring(0,$tempstr.lastIndexOf("_"))+$lastName)
+        #end
+        #if($itemName.contains("_"))
+            #set($tempstr = ${itemName})
+            #set($nub = $tempstr.lastIndexOf("_")+1)
+            #set($last = $tempstr.substring($nub) )
+            #set ($lastName = $last.substring(0,1).toUpperCase() + $last.substring(1,$last.length()))
+            #set($itemName = $tempstr.substring(0,$tempstr.lastIndexOf("_"))+$lastName)
+        #end
+        #if($itemName.contains("_"))
+            #set($tempstr = ${itemName})
+            #set($nub = $tempstr.lastIndexOf("_")+1)
+            #set($last = $tempstr.substring($nub) )
+            #set ($lastName = $last.substring(0,1).toUpperCase() + $last.substring(1,$last.length()))
+            #set($itemName = $tempstr.substring(0,$tempstr.lastIndexOf("_"))+$lastName)
+        #end
+        #if($itemName.contains("_"))
+            #set($tempstr = ${itemName})
+            #set($nub = $tempstr.lastIndexOf("_")+1)
+            #set($last = $tempstr.substring($nub) )
+            #set ($lastName = $last.substring(0,1).toUpperCase() + $last.substring(1,$last.length()))
+            #set($itemName = $tempstr.substring(0,$tempstr.lastIndexOf("_"))+$lastName)
+        #end
+        ## end repeat 3 times
+        ## end
+        #if($item.name==$orgIdFieldName)
+            if (META.enabledSaaS()) {
+                record.setOrgId(JWTKit.getOrgId());
+            }
+        #else
+            #set($ItemName = $itemName.substring(0,1).toUpperCase() + $itemName.substring(1,$itemName.length()))
+            record.set$ItemName($itemName);
+        #end
+    #end
+        page.setRecords(query${entity}Dao.find${entity}Page(page, record, search, orderBy, null, null));
+
+        return SuccessTip.create(page);
+        }
+#end
+        }

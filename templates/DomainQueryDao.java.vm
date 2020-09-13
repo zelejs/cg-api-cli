@@ -1,0 +1,28 @@
+package ${cfg.domainPackage}.dao;
+
+import ${cfg.am}.${cfg.en}.services.domain.model.${entity}Record;
+
+import com.baomidou.mybatisplus.plugins.Page;
+import com.baomidou.mybatisplus.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
+import ${cfg.am}.${cfg.en}.services.gen.persistence.model.${entity};
+
+import java.util.Date;
+import java.util.List;
+
+/**
+ * Created by ${author} on ${date}
+ */
+public interface Query${entity}Dao extends QueryMasterDao<${entity}> {
+   /*
+    * Query entity list by page
+    */
+    List<${entity}Record> find${entity}Page(Page<${entity}Record> page, @Param("record") ${entity}Record record,
+                                            @Param("search") String search, @Param("orderBy") String orderBy,
+                                            @Param("startTime") Date startTime, @Param("endTime") Date endTime);
+
+    /*
+     * Query entity model for details
+     */
+    ${entity}Model queryMasterModel(@Param("id") Long id);
+}

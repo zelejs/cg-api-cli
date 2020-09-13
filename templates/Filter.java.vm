@@ -1,0 +1,38 @@
+package ${cfg.filterPackage};
+
+import com.jfeat.crud.plus.CRUDFilter;
+import ${cfg.am}.${cfg.en}.services.gen.persistence.model.${entity};
+
+
+/**
+ * Created by ${author} on ${date}
+ */
+public class ${entity}Filter implements CRUDFilter<${entity}> {
+
+    private String[] ignoreFields = new String[]{};
+    private String[] updateIgnoreFields = new String[]{};
+
+    @Override
+    public void filter(${entity} entity, boolean insertOrUpdate) {
+
+        //if insertOrUpdate is true,means for insert, do this
+        if (insertOrUpdate){
+
+            //then insertOrUpdate is false,means for update,do this
+        }else {
+
+        }
+
+    }
+
+    @Override
+    public String[] ignore(boolean retrieveOrUpdate) {
+        //if retrieveOrUpdate is true,means for retrieve ,do this
+        if (retrieveOrUpdate){
+            return ignoreFields;
+            //then retrieveOrUpdate  if false ,means for update,do this
+        }else {
+            return updateIgnoreFields;
+        }
+    }
+}

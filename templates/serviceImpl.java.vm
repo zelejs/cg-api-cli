@@ -1,0 +1,421 @@
+package ${package.ServiceImpl};
+    #set($serviceImplName=${table.serviceImplName})
+    #set($tablename = ${table.name})
+    #set($slaves = ${cfg.slaves})
+    #set ($num = $slaves.size())
+    #set($children = ${cfg.children})
+    #if($tablename.equalsIgnoreCase(${cfg.masterOnly}))
+        #set($pack = "import com.jfeat.crud.plus.impl.CRUDServiceOnlyImpl;")
+        #set($ext = " extends CRUDServiceOnlyImpl<"+${entity}+">")
+        #set($flag="true")
+    #elseif($tablename.equalsIgnoreCase(${cfg.masterModel}))
+        #set($pack = "import com.jfeat.crud.plus.impl.CRUDServiceOverModelImpl;")
+        #set($ext = " extends CRUDServiceOverModelImpl<"+${entity}+","+${entity}+"Model"+">")
+        #set($modelpack ="import "+ ${cfg.modelPackage}+"."+${entity}+"Model;")
+    #elseif($tablename.equalsIgnoreCase(${cfg.slave1}))
+        #set($pack = "import com.jfeat.crud.plus.impl.CRUDServiceOnlyImpl;")
+        #set($ext = " extends CRUDServiceOnlyImpl<"+${entity}+">")
+        #set($slavepack ="I")
+    #elseif($tablename.equalsIgnoreCase(${cfg.slave2}))
+        #set($pack = "import com.jfeat.crud.plus.impl.CRUDServiceOnlyImpl;")
+        #set($ext = " extends CRUDServiceOnlyImpl<"+${entity}+">")
+        #set($slavepack ="I")
+    #elseif($tablename.equalsIgnoreCase(${cfg.slave3}))
+        #set($pack = "import com.jfeat.crud.plus.impl.CRUDServiceOnlyImpl;")
+        #set($ext = " extends CRUDServiceOnlyImpl<"+${entity}+">")
+        #set($slavepack ="I")
+    #elseif($tablename.equalsIgnoreCase(${cfg.slave4}))
+        #set($pack = "import com.jfeat.crud.plus.impl.CRUDServiceOnlyImpl;")
+        #set($ext = " extends CRUDServiceOnlyImpl<"+${entity}+">")
+        #set($slavepack ="I")
+    #elseif($tablename.equalsIgnoreCase(${cfg.slave5}))
+        #set($pack = "import com.jfeat.crud.plus.impl.CRUDServiceOnlyImpl;")
+        #set($ext = " extends CRUDServiceOnlyImpl<"+${entity}+">")
+        #set($slavepack ="I")
+    #elseif($tablename.equalsIgnoreCase(${cfg.groupBy}))
+        #set($pack = "import com.jfeat.crud.plus.impl.CRUDServiceGroupByImpl;")
+        #set($ext = " extends CRUDServiceGroupByImpl<"+${cfg.groupName}+","+${cfg.groupByName}+">")
+    #elseif($tablename.equalsIgnoreCase(${cfg.group}))
+        #set($pack = "import com.jfeat.crud.plus.impl.CRUDServiceGroupImpl;")
+        #set($ext = " extends CRUDServiceGroupImpl<"+${entity}+">")
+    #elseif($tablename.equalsIgnoreCase(${cfg.child}))
+        #set($pack = "")
+        #set($ext = "")
+    #elseif($tablename.equalsIgnoreCase(${cfg.relation}))
+        #set($pack = "import com.jfeat.crud.plus.impl.CRUDServicePeerImpl;")
+        #set($ext = " extends CRUDServicePeerImpl<"+${cfg.moreName}+","+${cfg.moreToName}+","+${entity}+">")
+    #elseif($tablename.equalsIgnoreCase(${cfg.group}))
+        #set($pack = "import com.jfeat.crud.plus.impl.CRUDServiceGroupImpl;")
+        #set($ext = " extends CRUDServiceGroupImpl<"+${entity}+">")
+    #else
+        #set($pack = "import com.jfeat.crud.plus.impl.CRUDServiceOnlyImpl;")
+        #set($ext = " extends CRUDServiceOnlyImpl<"+${entity}+">")
+        #set($flag="true")
+    #end
+
+#if($tablename.equalsIgnoreCase(${cfg.groupBy}))
+import ${package.Entity}.${cfg.groupName};
+import ${package.Mapper}.${cfg.groupName}Mapper;
+#end
+import com.baomidou.mybatisplus.mapper.BaseMapper;
+import com.jfeat.crud.plus.FIELD;
+#if($tablename.equalsIgnoreCase(${cfg.relation}))
+import ${package.Entity}.${cfg.moreName};
+import ${package.Entity}.${cfg.moreToName};
+import ${package.Mapper}.${table.mapperName};
+import ${package.Mapper}.${cfg.moreName}Mapper;
+import ${package.Mapper}.${cfg.moreToName}Mapper;
+#end
+import ${package.Entity}.${entity};
+import ${package.Mapper}.${table.mapperName};
+#if($num==1)
+#set ($RelationName = ${cfg.masterIdRelationName})
+#if($RelationName)
+import com.jfeat.am.module.cgg.services.gen.persistence.dao.${RelationName}Mapper;
+import com.jfeat.am.module.cgg.services.gen.persistence.model.${RelationName};
+#end
+#end
+#foreach($item in $slaves)
+#set ($itemName = $item.substring(0,1).toUpperCase() + $item.substring(1,$item.length()))
+import ${package.Mapper}.${itemName}Mapper;
+import ${package.Entity}.${itemName};
+#end
+#foreach($item in $children)
+    #set ($iName = $item.substring(0,1).toLowerCase() + $item.substring(1,$item.length()))
+    #set ($IName = $iName.substring(0,1).toUpperCase() + $iName.substring(1,$iName.length()))
+import ${package.Entity}.${IName};
+import ${package.Mapper}.${IName}Mapper;
+#end
+import ${package.Service}.${table.serviceName};
+import ${superServiceImplClassPackage};
+import org.springframework.stereotype.Service;
+import com.jfeat.crud.base.exception.BusinessCode;
+import com.jfeat.crud.base.exception.BusinessException;
+import javax.annotation.Resource;
+$!pack
+#if($modelpack)
+${modelpack}
+#end
+
+/**
+ * <p>
+ * $!{table.comment} implementation
+ * </p>
+ *${table.serviceName}
+ * @author ${author}
+ * @since ${date}
+ */
+
+@Service
+public class ${table.serviceImplName} $!ext implements ${table.serviceName} {
+
+
+#if($tablename.equalsIgnoreCase(${cfg.relation}))
+    @Resource
+    protected ${cfg.moreName}Mapper masterMapper;
+
+    @Resource
+    protected ${cfg.moreToName}Mapper masterPeerMapper;
+
+    @Resource
+    protected ${cfg.relationName}Mapper relationMapper;
+
+
+    @Override
+    protected BaseMapper<${cfg.moreName}> getMasterMapper() {
+            return masterMapper;
+    }
+
+    @Override
+    protected BaseMapper<${cfg.moreToName}> getMasterPeerMapper() {
+            return masterPeerMapper;
+    }
+
+    @Override
+    protected BaseMapper<${cfg.relationName}> getRelationMapper() {
+            return relationMapper;
+    }
+
+    @Override
+    protected String[] relationMatches() {
+            return new String[0];
+    }
+#end
+
+#if($tablename.equalsIgnoreCase(${cfg.groupBy}))
+        private static final String groupByField = "${cfg.groupId}";
+
+        @Resource
+        protected ${cfg.groupByName}Mapper groupByMapper;
+
+        @Resource
+        protected ${cfg.groupName}Mapper groupMapper;
+
+        @Override
+        protected BaseMapper<${cfg.groupName}> getGroupMapper() {
+                return groupMapper;
+        }
+
+        @Override
+        protected BaseMapper<${cfg.groupByName}> getGroupByMapper() {
+                return groupByMapper;
+        }
+
+        @Override
+        protected String groupByFieldName() {
+               ## throw new RuntimeException("Please specifiy the field name here .");
+               return groupByField;
+        }
+#end
+
+#set ($masterMapper = ${table.mapperName})
+#set ($masterMapper = $masterMapper.substring(0,1).toLowerCase() + $masterMapper.substring(1,$masterMapper.length()))
+
+#if($flag)
+        @Resource
+        protected ${table.mapperName} $masterMapper;
+
+        @Override
+        protected BaseMapper<${entity}> getMasterMapper() {
+                return $masterMapper;
+        }
+#end
+
+#if($ext.contains(" extends CRUDServiceGroupImpl"))
+        @Resource
+        private ${table.mapperName} $masterMapper;
+
+        @Override
+        protected BaseMapper<${entity}> getGroupMapper() {
+                return $masterMapper;
+        }
+#end
+
+#if($slavepack)
+##    private static final String masterField = "${cfg.masterId}";
+##
+##    @Resource
+##    protected ${table.mapperName} $masterMapper;
+##
+##    @Override
+##    protected BaseMapper<${entity}> getSlaveItemMapper() {
+##        return $masterMapper;
+##    }
+##
+##    @Override
+##    protected String masterFieldName() {
+##        ## if(true){
+##        ##    throw new RuntimeException("Please check masterField is correct!");
+##        ## }
+##        return masterField;
+##    }
+    @Resource
+    protected ${table.mapperName} $masterMapper;
+
+    @Override
+    protected BaseMapper<${entity}> getMasterMapper() {
+         return $masterMapper;
+    }
+#end
+
+
+#if($modelpack)
+    @Resource
+    protected ${table.mapperName} $masterMapper;
+
+    #foreach($item in $children)
+        #set ($iName = $item.substring(0,1).toLowerCase() + $item.substring(1,$item.length()))
+        #set ($IName = $iName.substring(0,1).toUpperCase() + $iName.substring(1,$iName.length()))
+            @Resource
+            private ${IName}Mapper ${iName}Mapper;
+
+    private final static String ${iName}FieldName = "${iName}_id";
+
+    private final static String ${iName}KeyName = "${iName}Id";
+    #end
+
+    @Override
+    protected BaseMapper<${entity}> getMasterMapper() {
+        return $masterMapper;
+    }
+
+    @Override
+    protected Class<${entity}> masterClassName() {
+        return ${entity}.class;
+    }
+
+    @Override
+    protected Class<${entity}Model> modelClassName() {
+        return ${entity}Model.class;
+    }
+
+
+#set ($no = 1)
+#foreach($item in $slaves)
+
+##    #set ($itemName = $item.substring(0,1).toLowerCase() + $item.substring(1,$item.length()))
+##    #if($item.contains("_"))
+##        #set($tempstr = ${item.name})
+##        #set($nub = $tempstr.lastIndexOf("_")+1)
+##        #set($last = $tempstr.substring($nub) )
+##        #set ($lastName = $last.substring(0,1).toUpperCase() + $last.substring(1,$last.length()))
+##        #set($itemName = $tempstr.substring(0,$tempstr.lastIndexOf("_"))+$lastName)
+##    #end
+##    #set ($ItemName = $item.substring(0,1).toUpperCase() + $item.substring(1,$item.length()))
+##    #set ($fieldName = $itemName.replace(${table.name}, ""))
+##    #set ($fieldName = $fieldName.substring(0,1).toLowerCase() + $fieldName.substring(1,$fieldName.length()))
+##    #if($item.endsWith("y"))
+##        #set ($idx = $fieldName.length())
+##        #set ($idx = $idx - 1)
+##        #set ($fieldName = $fieldName.substring(0, $idx)+"ies")
+##    #elseif($item.endsWith("s"))
+##        #set ($fieldName = $fieldName+"es")
+##    #else
+##        #set ($fieldName = $fieldName+"s")
+##    #end
+
+    #set($ItemName = $item)
+    #set($itemName = $item.substring(0,1).toLowerCase()+$item.substring(1))
+
+    @Resource
+    private ${ItemName}Mapper ${itemName}Mapper;
+    #if($num==1)
+    #set ($RelationName = ${cfg.masterIdRelationName})
+    #if($RelationName)
+    #set ($relationName = $RelationName.substring(0,1).toLowerCase() + $RelationName.substring(1,$RelationName.length()))
+    @Resource
+    private ${RelationName}Mapper ${relationName}Mapper; // one many by peer
+    #end
+
+    private final static String ${itemName}FieldName = "${cfg.masterId}";
+    #elseif($no==1)
+    private final static String ${itemName}FieldName = "${cfg.masterId1}";
+    #elseif($no==2)
+    private final static String ${itemName}FieldName = "${cfg.masterId2}";
+    #elseif($no==3)
+    private final static String ${itemName}FieldName = "${cfg.masterId3}";
+    #elseif($no==4)
+    private final static String ${itemName}FieldName = "${cfg.masterId4}";
+    #elseif($no==5)
+    private final static String ${itemName}FieldName = "${cfg.masterId5}";
+    #end
+
+    #if($slaves.size() > 1)
+    private final static String ${itemName}KeyName = "${itemName}s";
+    #else
+    private final static String ${itemName}KeyName = "items";
+    #end
+
+    #set ($no = $no + 1)
+#end
+
+    @Override
+    protected String[] slaveFieldNames() {
+        return new String[]{
+        #set ($ii=1)
+        #foreach($item in $slaves)
+            #set($itemName = $item.substring(0,1).toLowerCase()+$item.substring(1))
+            #if($ii==1)
+                 ${itemName}KeyName
+                 #set($ii=$ii+1)
+            #else
+                ,${itemName}KeyName
+            #end
+
+        #end
+        };
+    }
+
+    @Override
+    protected FIELD onSlaveFieldItem(String field) {
+    #set ($no = 0)
+    #foreach($item in $slaves)
+    #set ($itemName = $item.substring(0,1).toLowerCase() + $item.substring(1,$item.length()))
+    ##set ($ItemName = $itemName.substring(0,1).toUpperCase() + $itemName.substring(1,$itemName.length()))
+    #set ($no = $no + 1)
+    #if($no==1)
+        if (field.compareTo(${itemName}KeyName) == 0) {
+    #else
+        else if (field.compareTo(${itemName}KeyName) == 0) {
+    #end
+            FIELD _field = new FIELD();
+            _field.setItemKeyName(field);
+            _field.setItemFieldName(${itemName}FieldName);
+            _field.setItemClassName(${item}.class);
+            _field.setItemMapper(${itemName}Mapper);
+            #if($num==1)
+            #set ($RelationName = ${cfg.masterIdRelationName})
+            #if($RelationName)
+            #set ($relationName = $RelationName.substring(0,1).toLowerCase() + $RelationName.substring(1,$RelationName.length()))
+            // one many by peer
+            _field.setItemRelationMapper(${relationName}Mapper);
+            _field.setItemRelationClassName(${RelationName}.class);
+            #end
+            #elseif($no==1)
+            #elseif($no==2)
+            #elseif($no==3)
+            #elseif($no==4)
+            #elseif($no==5)
+            #end
+
+            return _field;
+        }
+        #end
+
+        throw new BusinessException(BusinessCode.BadRequest);
+    }
+
+
+    @Override
+    protected String[] childFieldNames() {
+##        return new String[]{
+##        #foreach($item in $children)
+##                ${item}KeyName,
+##        #end
+##        };
+        return new String[]{
+            #set ($ii=1)
+            #foreach($item in $children)
+                #set($itemName = $item.substring(0,1).toLowerCase()+$item.substring(1))
+                #if($ii==1)
+                    ${itemName}KeyName
+                    #set($ii=$ii+1)
+                #else
+                        ,${itemName}KeyName
+                #end
+
+            #end
+        };
+    }
+
+    @Override
+    protected FIELD onChildFieldItem(String field) {
+        #set ($no = 0)
+        #foreach($item in $children)
+        #set ($itemName = $item.substring(0,1).toLowerCase() + $item.substring(1,$item.length()))
+        ##set ($ItemName = $itemName.substring(0,1).toUpperCase() + $itemName.substring(1,$itemName.length()))
+        #set ($no = $no + 1)
+        #if($no==1)
+            if (field.compareTo(${itemName}KeyName) == 0) {
+        #else
+            else if (field.compareTo(${itemName}KeyName) == 0) {
+        #end
+                FIELD _field = new FIELD();
+                _field.setItemKeyName(field);
+                _field.setItemFieldName(${itemName}FieldName);
+                _field.setItemClassName(${item}.class);
+                _field.setItemMapper(${itemName}Mapper);
+                return _field;
+            }
+        #end
+
+        throw new BusinessException(BusinessCode.BadRequest);
+    }
+
+#end
+
+
+
+}
+
+

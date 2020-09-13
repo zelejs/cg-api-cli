@@ -1,0 +1,47 @@
+package ${cfg.am}.${cfg.en}.services.domain.service;
+
+##import com.baomidou.mybatisplus.plugins.Page;
+##import com.jfeat.am.${cfg.am}.${cfg.en}.services.gen.persistence.model.${entity};
+#if($tablename.equalsIgnoreCase(${cfg.groupBy}))
+import ${cfg.am}.${cfg.en}.services.gen.crud.service.CRUD${entity}GroupByService;
+#elseif($tablename.equalsIgnoreCase(${cfg.group}))
+#if($tablename.endsWith("_category"))
+import ${cfg.am}.${cfg.en}.services.gen.crud.service.CRUD${entity}Service;
+#else
+import ${cfg.am}.${cfg.en}.services.gen.crud.service.CRUD${entity}GroupService;
+#end
+#elseif($tablename.equalsIgnoreCase(${cfg.master}))
+import ${cfg.am}.${cfg.en}.services.gen.crud.service.CRUD${entity}OverModelService;
+#else
+import ${cfg.am}.${cfg.en}.services.gen.crud.service.CRUD${entity}Service;
+#end
+##import java.util.List;
+
+/**
+ * Created by vincent on 2017/10/19.
+ */
+#if($tablename.equalsIgnoreCase(${cfg.groupBy}))
+public interface ${entity}GroupByService extends CRUD${entity}GroupByService{
+#elseif($tablename.equalsIgnoreCase(${cfg.group}))
+#if($tablename.endsWith("_category"))
+public interface ${entity}Service extends CRUD${entity}Service{
+#else
+public interface ${entity}GroupService extends CRUD${entity}GroupService{
+#end
+#elseif($tablename.equalsIgnoreCase(${cfg.master}))
+public interface ${entity}OverModelService extends CRUD${entity}OverModelService{
+#elseif($tablename.equalsIgnoreCase(${cfg.slave1}))
+public interface ${entity}Service extends CRUD${entity}Service{
+#elseif($tablename.equalsIgnoreCase(${cfg.slave2}))
+public interface ${entity}Service extends CRUD${entity}Service{
+#elseif($tablename.equalsIgnoreCase(${cfg.slave3}))
+public interface ${entity}Service extends CRUD${entity}Service{
+#elseif($tablename.equalsIgnoreCase(${cfg.slave4}))
+public interface ${entity}Service extends CRUD${entity}Service{
+#elseif($tablename.equalsIgnoreCase(${cfg.slave5}))
+public interface ${entity}Service extends CRUD${entity}Service{
+#else
+public interface ${entity}Service extends CRUD${entity}Service{
+#end
+    ##List<${entity}> find${entity}Page(Page<${entity}> page, ${entity} ${entity.toLowerCase()} , String search, String orderBy );
+}

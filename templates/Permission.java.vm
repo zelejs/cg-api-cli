@@ -1,0 +1,12 @@
+package ${cfg.am}.$!{cfg.en}.api.permission;
+#set ($entup = ${entity.toUpperCase()})
+#set ($entlow = ${entity.toLowerCase()})
+/**
+ * Created by ${author} on ${date}
+ */
+public class ${entity}Permission {
+    public static final String $!{entup}_VIEW = "$!{entlow}.view";
+    public static final String $!{entup}_NEW = "$!{entlow}.new";
+    public static final String $!{entup}_EDIT = "$!{entlow}.edit";
+    public static final String $!{entup}_DELETE = "$!{entlow}.delete";
+}
