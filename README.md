@@ -15,6 +15,8 @@
 ```shell
 $ npm i -g
 ```
+### crud.json配置，请查看crud.json配置说明
+[crud.json配置.md](crud.json使用说明.md)
 
 ### 使用方法
 
