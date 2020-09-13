@@ -10,9 +10,11 @@
 
 ### 安装
 
-运行npm安装： `npm i -g`
+下载最新版本 [https://github.com/zelejs/cg-api-cli/releases/download/latest/cg-cli-1.0.0.jar](https://github.com/zelejs/cg-api-cli/releases/download/latest/cg-cli-1.0.0.jar) , 放置到 lib 目录下, 然后执行以下命令行安装
 
-下载 https://github.com/zelejs/cg-api-cli/releases/download/latest/cg-cli-1.0.0.jar，然后放置到 lib 目录下
+```shell
+$ npm i -g
+```
 
 ### 使用方法
 
