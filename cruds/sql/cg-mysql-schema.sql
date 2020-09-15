@@ -3,7 +3,8 @@ SET FOREIGN_KEY_CHECKS=0;
 DROP TABLE IF EXISTS `cg_master_resource_category`;
 CREATE TABLE `cg_master_resource_category` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键id',
-  `org_id` bigint(20) NOT NULL DEFAULT 0 COMMENT '资源归属部门',
+  `org_id` bigint(20) NOT NULL DEFAULT 0 COMMENT '数据隔离组织id',
+  `org_tag` varchar(100) DEFAULT NULL COMMENT '组织标识',
   `pid` varchar(100) NOT NULL COMMENT '父节点',
   `name` varchar(100) NOT NULL COMMENT '名字',
   `field` varchar(100) DEFAULT NULL COMMENT '分组标识字段',
@@ -15,19 +16,20 @@ CREATE TABLE `cg_master_resource_category` (
 DROP TABLE IF EXISTS `cg_master_resource`;
 CREATE TABLE `cg_master_resource` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键id',
-  `org_id` bigint(20) NOT NULL DEFAULT 0 COMMENT '资源归属部门',
+  `org_id` bigint(20) NOT NULL DEFAULT 0 COMMENT '数据隔离组织id',
+  `org_tag` varchar(100) DEFAULT NULL COMMENT '组织标识',
   `name` varchar(100) NOT NULL COMMENT '资源名字',
   `status` varchar(26) NOT NULL COMMENT '状态[OPEN,SUBMITTED,APPROVED,REJECTED,CLOSED]',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `category_id` bigint(20) DEFAULT NULL COMMENT '资源分类关联ID',
   `user_id` bigint(20) DEFAULT 0 COMMENT '资源归属用户',
+  `owner_id` bigint(20) DEFAULT 0 COMMENT '资源归属用户或用[owner_id]',
   `code` varchar(100) DEFAULT NULL COMMENT '资源唯一编号',
   `title` varchar(100) DEFAULT NULL COMMENT '资源标题',
-  `category_field` varchar(50) DEFAULT NULL COMMENT '资源分类关联字段',
-  `category_id` bigint(20) DEFAULT NULL COMMENT '资源分类ID',
-  `created_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `registered_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '注册时间',
+  `registered_time` datetime DEFAULT NULL COMMENT '注册时间',
   `start_time` datetime DEFAULT NULL COMMENT '开始时间',
   `end_time` datetime DEFAULT NULL COMMENT '结束时间',
-  `updated_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
   `closed_time` datetime DEFAULT NULL COMMENT '关闭时间',
   `expired_time` datetime DEFAULT NULL COMMENT '过期时间',
   `appointed_time` datetime DEFAULT NULL COMMENT '预约时间',
@@ -68,7 +70,8 @@ CREATE TABLE `cg_master_resource_record` (
 DROP TABLE IF EXISTS `cg_master_resource_peer`;
 CREATE TABLE `cg_master_resource_peer` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键id',
-  `org_id` bigint(20) NOT NULL DEFAULT 0 COMMENT '资源归属部门',
+  `org_id` bigint(20) NOT NULL DEFAULT 0 COMMENT '数据隔离组织id',
+  `org_tag` varchar(100) DEFAULT NULL COMMENT '组织标识',
   `name` varchar(100) NOT NULL COMMENT '资源名字',
   `status` varchar(26) NOT NULL COMMENT '状态[OPEN,SUBMITTED,APPROVED,REJECTED,CLOSED]',
   `user_id` bigint(20) DEFAULT 0 COMMENT '资源归属用户',
