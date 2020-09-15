@@ -33,4 +33,4 @@ Paramters:
 > 执行命令后会新建一个项目名和**module**同名的maven项目，后续可用maven命令进行编译和测试。
 
 ### 配置说明
-> [crud.json配置.md](crud.json使用说明.md)
+> [crud.json 配置说明](crud.json-guide.md)

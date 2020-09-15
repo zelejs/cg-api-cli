@@ -23,18 +23,19 @@ cruds=$3
 
 if [ -z $module ]; then
   echo "cg-api-cli: 未指定moduleName"
-  # usage
+  usage
   exit;
 fi
 
 if [ -z $sql ]; then
   echo "cg-api-cli: 未指定sql文件"
-  # usage
+  usage
   exit;
 fi
 
 if [ -z $cruds ]; then
   echo "cg-api-cli: 未指定cruds文件"
+  usage
   exit;
 fi
 
