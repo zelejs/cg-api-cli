@@ -58,9 +58,15 @@ fi
 
 ## java jar
 #path=$(cd `dirname $0`;pwd)
-rootpath=$(readlink -f $0)
+os_name=$(uname)
+if [[ $os_name == 'Darwin' ]];then
+   rootpath=$(greadlink -f "$0")
+else 
+   rootpath=$(readlink -f "$0")
+fi
 path=$(dirname $rootpath)
 lib=$path/lib/cg-cli-1.0.0.jar
+
 
 if [ ! -f $lib ]; then
   echo "cg-api-cli: fail to locate $lib"
