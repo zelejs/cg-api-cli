@@ -10,6 +10,11 @@
 
 ### 安装
 
+克隆代码
+```shell
+$ git clone --no-tags https://github.com/zelejs/cg-api-cli
+```
+
 下载最新版本 [https://github.com/zelejs/cg-api-cli/releases/download/latest/cg-cli-1.0.0.jar](https://github.com/zelejs/cg-api-cli/releases/download/latest/cg-cli-1.0.0.jar) , 放置到 lib 目录下, 然后执行以下命令行安装
 
 ```shell
