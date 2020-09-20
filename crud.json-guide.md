@@ -64,9 +64,9 @@
     {
         "mask": "master",     //mask键值为master
         "master": "cg_master_resource",  //主表名称
-        "masterId": "cg_master_resource_relation::master_id:id",  //masterId 键值为 "关系表名称::关联表关联主表id:主表id"
+        "masterId": "cg_master_resource_relation::master_id:master_peer_id",  //masterId 为以;分隔的各从表关联字段:  "关系表名称::关联表关联主表id:关联表关联从表id"
         "slaves": [
-            "cg_master_resource_peer"    //从表名称
+            "cg_master_resource_peer"  //从表名称
         ]
     },
     {
