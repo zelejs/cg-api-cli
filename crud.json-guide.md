@@ -11,11 +11,12 @@
 
 
 ### 单表配置
->  mask 省缺为 master
+>  mask 省缺为 master  （features 对以下所有配置有效）
 ```xml
 [
     {
         "master": "cg_master_resource"  //cg_master_resource为单表名称
+        "features": ["tag","image","eav","category","attachment"]
     }
 ]
 ```
