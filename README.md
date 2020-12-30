@@ -1,6 +1,9 @@
 # cg-api-cli
 > cg-api 的本地测试cli工具。
 
+## 配置说明
+> [crud.json 配置说明](crud.json-guide.md)
+
 ### 运行需求
 
 - node >= 10
@@ -36,6 +39,3 @@ Paramters:
 ```
 
 > 执行命令后会新建一个项目名和**module**同名的maven项目，后续可用maven命令进行编译和测试。
-
-### 配置说明
-> [crud.json 配置说明](crud.json-guide.md)
