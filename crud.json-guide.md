@@ -46,7 +46,7 @@
     {
         "mask": "master",
         "master": "cg_master_resource",
-        "masterId": "master_id;other_id:id",
+        "masterId": "master_id:id;other_id:id",
         "slaves": [
             "cg_master_resource_item", 
             "cg_master_resource_record"
